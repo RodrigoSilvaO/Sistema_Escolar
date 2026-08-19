@@ -4,42 +4,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Login - Sistema Escolar</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            background:
+                radial-gradient(circle at top left, rgba(0, 123, 255, 0.25), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(0, 198, 255, 0.18), transparent 35%),
+                linear-gradient(135deg, #0f172a, #111827, #172554);
+
+            color: #fff;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 430px;
+            padding: 20px;
+        }
+
+        .login-box {
+            padding: 42px 38px;
+
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .login-box h1 {
+            text-align: center;
+            font-size: 27px;
+            font-weight: 800;
+            letter-spacing: 1px;
+
+            margin-bottom: 8px;
+
+            background: linear-gradient(90deg, #60a5fa, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-box > p {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 14px;
+
+            margin-bottom: 35px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            height: 48px;
+
+            padding: 0 15px;
+            margin-bottom: 20px;
+
+            color: #fff;
+            font-size: 15px;
+
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 10px;
+
+            outline: none;
+
+            transition: 0.25s;
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        input:focus {
+            border-color: #38bdf8;
+
+            box-shadow:
+                0 0 0 3px rgba(56, 189, 248, 0.15);
+
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        button {
+            width: 100%;
+            height: 50px;
+
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: linear-gradient(135deg, #2563eb, #0284c7);
+
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+
+            transition: 0.25s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 12px 25px rgba(37, 99, 235, 0.45);
+
+            filter: brightness(1.08);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .login-erro {
+            margin-top: 20px;
+            padding: 12px 15px;
+
+            text-align: center;
+
+            color: #fecaca;
+            background: rgba(220, 38, 38, 0.15);
+
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 9px;
+
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px;
+            }
+
+            .login-box {
+                padding: 35px 25px;
+            }
+
+            .login-box h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
 
-<div class="login-container">
+    <div class="login-container">
 
-    <div class="login-box">
+        <div class="login-box">
 
-        <h1>SISTEMA ESCOLAR</h1>
-        <p>Gestão Acadêmica e Escolar</p>
+            <h1>SISTEMA ESCOLAR</h1>
 
-        <form method="POST">
+            <p>Gestão Acadêmica e Escolar</p>
 
-            <label>Usuário</label>
-            <input type="text" name="usuario" required>
+            <form method="POST">
 
-            <label>Senha</label>
-            <input type="password" name="senha" required>
+                <label for="usuario">Usuário</label>
 
-            <button type="submit">Entrar</button>
+                <input
+                    type="text"
+                    id="usuario"
+                    name="usuario"
+                    placeholder="Digite seu usuário"
+                    autocomplete="username"
+                    required
+                >
 
-        </form>
+                <label for="senha">Senha</label>
 
-        {% if erro %}
-            <div class="login-erro">
-                {{ erro }}
-            </div>
-        {% endif %}
+                <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button type="submit">
+                    Entrar
+                </button>
+
+            </form>
+
+            {% if erro %}
+                <div class="login-erro">
+                    {{ erro }}
+                </div>
+            {% endif %}
+
+        </div>
 
     </div>
 
-</div>
-
 </body>
+
 </html>
+```
