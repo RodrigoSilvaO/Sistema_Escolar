@@ -1,0 +1,30 @@
+<!-- atualizar/registro_frequencia.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Atualizar Registro de Frequencia{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Atualizar Registro de Frequencia
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_input("", "hidden", "id_frequencia", id_frequencia) }}
+
+    {{ macros.render_select("Aluno:", "id_aluno", alunos, id_aluno) }}
+
+    {{ macros.render_select("Disciplina:", "id_disciplina", disciplinas, id_disciplina) }}
+
+    {{ macros.render_input("Data da Aula:", "date", "data_aula", data_aula) }}
+
+    {{ macros.render_select("Status de Presenca:", "status_presenca", status_opcoes, status_presenca) }}
+
+    <button type="submit" class="btn btn-primary">Atualizar</button>
+</form>
+
+{% endblock %}

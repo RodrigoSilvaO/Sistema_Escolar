@@ -1,0 +1,28 @@
+<!-- atualizar/resultado_final.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Atualizar Resultado Final{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Atualizar Resultado Final
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_input("", "hidden", "id_aluno", id_aluno) }}
+
+    {{ macros.render_input("", "hidden", "id_disciplina", id_disciplina) }}
+
+    {{ macros.render_select("Situacao:", "situacao", situacao_opcoes, situacao) }}
+
+    {{ macros.render_select("Frequencia:", "frequencia", frequencia_opcoes, frequencia) }}
+
+    <button type="submit" class="btn btn-primary">Atualizar</button>
+</form>
+
+{% endblock %}

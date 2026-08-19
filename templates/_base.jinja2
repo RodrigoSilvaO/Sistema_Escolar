@@ -1,0 +1,78 @@
+<!-- _base.jinja2 -->
+{% import "_macros.jinja2" as macros %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TITLE{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}" defer></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-dark border-bottom border-body mb-4" data-bs-theme="dark">
+        <div class="container-fluid text-center">
+            <a class="navbar-brand" href="{{ url_for('home') }}">{% block nav_title %}{% endblock %}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <!-- TUDO QUE ESTIVER DENTRO DESSE TAG <ul> aparecera no NAVBAR -->
+
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="{{ url_for('home') }}">Home</a>
+                    </li>
+
+                    <!-- dropdowns -->
+                    {{ macros.render_nav_dropdown("Consultar", {
+                    "/consultar/aluno" : "Aluno",
+                    "/consultar/professor" : "Professor",
+                    "/consultar/especialidade_professor" : "Especialidade do Professor",
+                    "/consultar/disciplina" : "Disciplina",
+                    "/consultar/disciplina_professor" : "Disciplina x Professor",
+                    "/consultar/periodo_letivo" : "Período Letivo",
+                    "/consultar/periodo_ferias" : "Período de Férias",
+                    "/consultar/turma" : "Turma",
+                    "/consultar/turma_disciplina" : "Turma x Disciplina",
+                    "/consultar/matricula_disciplina" : "Matrícula em Disciplina",
+                    "/consultar/avaliacao" : "Avaliação",
+                    "/consultar/registro_frequencia" : "Registro de Frequência",
+                    "/consultar/resultado_final" : "Resultado Final",
+                    }) }}
+                    <!-- rota : nome_que_aparece_no_Navbar -->
+
+                    {{ macros.render_nav_dropdown("Cadastrar", {
+                    "/cadastrar/aluno" : "Aluno",
+                    "/cadastrar/professor" : "Professor",
+                    "/cadastrar/especialidade_professor" : "Especialidade do Professor",
+                    "/cadastrar/disciplina" : "Disciplina",
+                    "/cadastrar/disciplina_professor" : "Disciplina x Professor",
+                    "/cadastrar/periodo_letivo" : "Período Letivo",
+                    "/cadastrar/periodo_ferias" : "Período de Férias",
+                    "/cadastrar/turma" : "Turma",
+                    "/cadastrar/turma_disciplina" : "Turma x Disciplina",
+                    "/cadastrar/matricula_disciplina" : "Matrícula em Disciplina",
+                    "/cadastrar/avaliacao" : "Avaliação",
+                    "/cadastrar/registro_frequencia" : "Registro de Frequência",
+                    "/cadastrar/resultado_final" : "Resultado Final",
+                    }) }}
+                    <!-- rota : nome_que_aparece_no_Navbar -->
+
+                    <!-- FIM DO NAVBAR -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

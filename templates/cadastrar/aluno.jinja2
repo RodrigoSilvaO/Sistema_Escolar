@@ -1,0 +1,28 @@
+<!-- cadastrar/aluno.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Cadastrar Aluno{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Cadastro de Aluno
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_input("Nome:", "text", "nome", "") }}
+
+    {{ macros.render_input("Data de Nascimento:", "date", "data_nascimento", "") }}
+
+    {{ macros.render_input("Endereco:", "text", "endereco", "") }}
+
+    {{ macros.render_input("Data de Matricula:", "date", "data_matricula", "") }}
+
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</form>
+
+{% endblock %}

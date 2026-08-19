@@ -1,0 +1,26 @@
+<!-- cadastrar/turma_disciplina.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Cadastrar Turma x Disciplina{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Cadastro de Turma x Disciplina
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_select("Turma:", "id_turma", turmas, "") }}
+
+    {{ macros.render_select("Disciplina:", "id_disciplina", disciplinas, "") }}
+
+    {{ macros.render_select("Professor:", "id_professor", professores, "") }}
+
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</form>
+
+{% endblock %}

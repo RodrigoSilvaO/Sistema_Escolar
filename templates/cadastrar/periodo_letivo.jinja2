@@ -1,0 +1,26 @@
+<!-- cadastrar/periodo_letivo.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Cadastrar Periodo Letivo{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Cadastro de Periodo Letivo
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_input("Descricao:", "text", "descricao", "") }}
+
+    {{ macros.render_input("Data de Inicio:", "date", "data_inicio", "") }}
+
+    {{ macros.render_input("Data de Fim:", "date", "data_fim", "") }}
+
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</form>
+
+{% endblock %}

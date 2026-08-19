@@ -1,0 +1,28 @@
+<!-- atualizar/periodo_ferias.jinja2 -->
+
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Atualizar Periodo de Ferias{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center" style="margin-bottom: 20px;">
+    Atualizar Periodo de Ferias
+</h2>
+
+<form class="text-center" action="{{ api }}" method="post">
+    <!-- Renderize os campos de entrada usando os macros (veja arquivo templates/_macros.jinja2) -->
+
+    {{ macros.render_input("", "hidden", "id_ferias", id_ferias) }}
+
+    {{ macros.render_select("Periodo Letivo:", "id_periodo", periodos, id_periodo) }}
+
+    {{ macros.render_input("Data de Inicio:", "date", "data_inicio", data_inicio) }}
+
+    {{ macros.render_input("Data de Fim:", "date", "data_fim", data_fim) }}
+
+    <button type="submit" class="btn btn-primary">Atualizar</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,22 @@
+<!-- index.jinja2 -->
+{% extends "_base.jinja2" %}
+
+{% block nav_title %}SISTEMA ESCOLAR{% endblock %}
+{% block title %}Sistema Escolar - Home Page{% endblock %}
+
+{% block content %}
+
+<h1>Estrutura do projeto</h1>
+<div>A pasta <b>templates/</b> contem as paginas HTML que o Python carrega.</div>
+<div>A pasta <b>static/</b> contem bibliotecas (CSS e JS) e imagens.</div>
+<div>A pasta <b>db/</b> contem o banco de dados .SQL e o modelo do DB construido no BrModelo.</div>
+<div>O arquivo <b>app.py</b> contem o aplicativo Flask, que instrui quais templates o Python deve carregar quando o
+    usuario acessa o site.</div>
+
+<h2 style="margin-top: 30px;">Tabelas do sistema</h2>
+<div>Use os menus <b>Consultar</b> e <b>Cadastrar</b> no topo da pagina para navegar entre as 13 tabelas do banco:
+    Aluno, Professor, Especialidade do Professor, Disciplina, Disciplina x Professor, Periodo Letivo,
+    Periodo de Ferias, Turma, Turma x Disciplina, Matricula em Disciplina, Avaliacao, Registro de Frequencia
+    e Resultado Final.</div>
+
+{% endblock %}
