@@ -1,22 +1,77 @@
-<!-- index.jinja2 -->
 {% extends "_base.jinja2" %}
 
 {% block nav_title %}SISTEMA ESCOLAR{% endblock %}
-{% block title %}Sistema Escolar - Home Page{% endblock %}
+{% block title %}Sistema Escolar - Início{% endblock %}
 
 {% block content %}
 
-<h1>Estrutura do projeto</h1>
-<div>A pasta <b>templates/</b> contem as paginas HTML que o Python carrega.</div>
-<div>A pasta <b>static/</b> contem bibliotecas (CSS e JS) e imagens.</div>
-<div>A pasta <b>db/</b> contem o banco de dados .SQL e o modelo do DB construido no BrModelo.</div>
-<div>O arquivo <b>app.py</b> contem o aplicativo Flask, que instrui quais templates o Python deve carregar quando o
-    usuario acessa o site.</div>
+<div class="inicio">
 
-<h2 style="margin-top: 30px;">Tabelas do sistema</h2>
-<div>Use os menus <b>Consultar</b> e <b>Cadastrar</b> no topo da pagina para navegar entre as 13 tabelas do banco:
-    Aluno, Professor, Especialidade do Professor, Disciplina, Disciplina x Professor, Periodo Letivo,
-    Periodo de Ferias, Turma, Turma x Disciplina, Matricula em Disciplina, Avaliacao, Registro de Frequencia
-    e Resultado Final.</div>
+    <h1>Gestão da Escola</h1>
+
+    <p>Bem-vindo ao Sistema Escolar</p>
+
+    <div class="info-box">
+
+        <div class="usuario">
+
+            <div class="usuario-info">
+
+                <h2>Informações do usuário</h2>
+
+                <p>
+                    <strong>Nome:</strong>
+                    {{ usuario.nome }}
+                </p>
+
+                <p>
+                    <strong>Usuário:</strong>
+                    {{ usuario.usuario }}
+                </p>
+
+                <p>
+                    <strong>Perfil:</strong>
+                    {{ usuario.perfil }}
+                </p>
+
+            </div>
+
+            <div class="usuario-foto">
+
+                <img
+                    src="{{ url_for('static', filename='img/' + usuario.foto) }}"
+                    alt="Foto do usuário">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="info-box">
+
+        <h2>Dados da escola</h2>
+
+        <p>
+            <strong>Período letivo:</strong> 2026
+        </p>
+
+        <p>
+            <strong>Situação:</strong> Em andamento
+        </p>
+
+    </div>
+
+    <div class="info-box">
+
+        <h2>Calendário escolar vigente</h2>
+
+        <p>1º Período: 09/02/2026 a 18/05/2026</p>
+        <p>2º Período: 18/05/2026 a 28/08/2026</p>
+        <p>3º Período: 31/08/2026 a 18/12/2026</p>
+
+    </div>
+
+</div>
 
 {% endblock %}

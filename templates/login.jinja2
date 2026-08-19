@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Escolar</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-box">
+
+        <h1>SISTEMA ESCOLAR</h1>
+        <p>Gestão Acadêmica e Escolar</p>
+
+        <form method="POST">
+
+            <label>Usuário</label>
+            <input type="text" name="usuario" required>
+
+            <label>Senha</label>
+            <input type="password" name="senha" required>
+
+            <button type="submit">Entrar</button>
+
+        </form>
+
+        {% if erro %}
+            <div class="login-erro">
+                {{ erro }}
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-<!-- _base.jinja2 -->
+```html
 {% import "_macros.jinja2" as macros %}
 
 <!DOCTYPE html>
@@ -14,22 +14,39 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-dark border-bottom border-body mb-4" data-bs-theme="dark">
-        <div class="container-fluid text-center">
-            <a class="navbar-brand" href="{{ url_for('home') }}">{% block nav_title %}{% endblock %}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+
+    <nav class="navbar navbar-expand-lg bg-dark border-bottom border-secondary mb-4"
+        data-bs-theme="dark">
+
+        <div class="container">
+
+            <!-- Nome do sistema -->
+            <a class="navbar-brand fw-bold me-4" href="{{ url_for('home') }}">
+                {% block nav_title %}{% endblock %}
+            </a>
+
+            <!-- Botão mobile -->
+            <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown"
+                aria-expanded="false"
+                aria-label="Abrir menu">
+
                 <span class="navbar-toggler-icon"></span>
             </button>
+
+            <!-- Menus -->
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                    <!-- TUDO QUE ESTIVER DENTRO DESSE TAG <ul> aparecera no NAVBAR -->
+
+                <ul class="navbar-nav align-items-lg-center gap-lg-1">
 
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="{{ url_for('home') }}">Home</a>
+                        <a class="nav-link px-3" href="{{ url_for('home') }}">
+                            Home
+                        </a>
                     </li>
 
-                    <!-- dropdowns -->
                     {{ macros.render_nav_dropdown("Consultar", {
                     "/consultar/aluno" : "Aluno",
                     "/consultar/professor" : "Professor",
@@ -45,7 +62,6 @@
                     "/consultar/registro_frequencia" : "Registro de Frequência",
                     "/consultar/resultado_final" : "Resultado Final",
                     }) }}
-                    <!-- rota : nome_que_aparece_no_Navbar -->
 
                     {{ macros.render_nav_dropdown("Cadastrar", {
                     "/cadastrar/aluno" : "Aluno",
@@ -62,17 +78,23 @@
                     "/cadastrar/registro_frequencia" : "Registro de Frequência",
                     "/cadastrar/resultado_final" : "Resultado Final",
                     }) }}
-                    <!-- rota : nome_que_aparece_no_Navbar -->
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ url_for('logout') }}">
+                            Sair
+                        </a>
+                    </li>
 
-                    <!-- FIM DO NAVBAR -->
                 </ul>
+
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container pb-5">
         {% block content %}{% endblock %}
-    </div>
+    </main>
+
 </body>
 
 </html>
+```

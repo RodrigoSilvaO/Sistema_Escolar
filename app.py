@@ -1,13 +1,49 @@
 
 import time
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, session, redirect, url_for
 
 from db.db import executar_insert_delete_update, executar_select
 
 # Create a Flask application
 app = Flask(__name__)
+app.secret_key = "sistema_escolar"
+USUARIOS = {
+    "Rodrigo": {
+        "senha": "Rodrigo",
+        "nome": "Rodrigo",
+        "perfil": "DEV",
+        "foto": "Rodrigo.png"
+    },
 
+    "Andre": {
+        "senha": "Andre",
+        "nome": "Andre",
+        "perfil": "Professor",
+        "foto": "Andre.png"
+    },
+
+    "Aryan": {
+        "senha": "Aryan",
+        "nome": "Aryan",
+        "perfil": "DEV",
+        "foto": "Aryan.png"
+    },
+
+    "Helena": {
+        "senha": "Helena",
+        "nome": "Helena",
+        "perfil": "DEV",
+        "foto": "Helena.png"
+    },
+
+    "Saulo": {
+        "senha": "Saulo",
+        "nome": "Saulo",
+        "perfil": "DEV",
+        "foto": "Saulo.png"
+    }
+}
 NOME_BANCO = "sistema_escolar"
 
 # Opcoes fixas usadas em campos do tipo ENUM do banco de dados
@@ -35,9 +71,45 @@ FREQUENCIA_OPCOES = [
 
 @app.route('/', methods=['GET'])
 def home():
-    return render_template('index.jinja2')
 
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
 
+    return render_template(
+        'index.jinja2',
+        usuario=session['usuario']
+    )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'POST':
+
+        usuario = request.form.get('usuario')
+        senha = request.form.get('senha')
+
+        if usuario in USUARIOS and USUARIOS[usuario]["senha"] == senha:
+
+            dados_usuario = USUARIOS[usuario].copy()
+            dados_usuario["usuario"] = usuario
+
+            session["usuario"] = dados_usuario
+
+            return redirect(url_for('home'))
+
+        return render_template(
+            'login.jinja2',
+            erro='Usuário ou senha incorretos.'
+        )
+
+    return render_template('login.jinja2')
+
+@app.route('/logout')
+def logout():
+
+    session.clear()
+
+    return redirect(url_for('login'))
 # ---------------------------------------------------------------------------
 # ALUNO
 # ---------------------------------------------------------------------------
