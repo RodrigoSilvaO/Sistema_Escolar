@@ -1,13 +1,13 @@
-
 import time
+from functools import wraps
 
 from flask import Flask, request, render_template, session, redirect, url_for
 
 from db.db import executar_insert_delete_update, executar_select
 
-# Create a Flask application
 app = Flask(__name__)
 app.secret_key = "sistema_escolar"
+
 USUARIOS = {
     "Rodrigo": {
         "senha": "Rodrigo",
@@ -15,28 +15,24 @@ USUARIOS = {
         "perfil": "DEV",
         "foto": "Rodrigo.png"
     },
-
     "Andre": {
         "senha": "Andre",
         "nome": "Andre Madureira",
         "perfil": "Professor",
         "foto": "Andre.png"
     },
-
     "Aryan": {
         "senha": "Aryan",
         "nome": "Aryan Assis",
         "perfil": "DEV",
         "foto": "Aryan.jpg"
     },
-
     "Helena": {
         "senha": "Helena",
         "nome": "Helena Freitas",
         "perfil": "DEV",
         "foto": "Helena.jpeg"
     },
-
     "Saulo": {
         "senha": "Saulo",
         "nome": "Saulo Henrique",
@@ -46,7 +42,6 @@ USUARIOS = {
 }
 NOME_BANCO = "sistema_escolar"
 
-# Opcoes fixas usadas em campos do tipo ENUM do banco de dados
 STATUS_PRESENCA_OPCOES = [
     ("Presente", "Presente"),
     ("Ausente", "Ausente"),
@@ -63,18 +58,48 @@ FREQUENCIA_OPCOES = [
     ("Justificado", "Justificado"),
 ]
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'usuario' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-##################
-#     TELAS      #
-##################
+def perfil_requerido(perfil_necessario):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'usuario' not in session:
+                return redirect(url_for('login'))
+            if session['usuario']['perfil'] != perfil_necessario:
+                return "ACESSO NEGADO: Você não tem permissão para acessar esta área.", 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def buscar_especialidades():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_especialidade, especialidade FROM especialidade_professor")
+
+def buscar_professores():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_professor, nome FROM professor")
+
+def buscar_disciplinas():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_disciplina, nome FROM disciplina")
+
+def buscar_periodos():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_periodo, descricao FROM periodo_letivo")
+
+def buscar_turmas():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_turma, nome FROM turma")
+
+def buscar_alunos():
+    return executar_select(db=NOME_BANCO, consulta_sql="SELECT id_aluno, nome FROM aluno")
 
 
 @app.route('/', methods=['GET'])
+@login_required
 def home():
-
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-
     return render_template(
         'index.jinja2',
         usuario=session['usuario']
@@ -82,47 +107,38 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     if request.method == 'POST':
-
         usuario = request.form.get('usuario')
         senha = request.form.get('senha')
 
         if usuario in USUARIOS and USUARIOS[usuario]["senha"] == senha:
-
             dados_usuario = USUARIOS[usuario].copy()
             dados_usuario["usuario"] = usuario
-
             session["usuario"] = dados_usuario
-
             return redirect(url_for('home'))
 
         return render_template(
             'login.jinja2',
             erro='Usuário ou senha incorretos.'
         )
-
     return render_template('login.jinja2')
 
 @app.route('/logout')
 def logout():
-
     session.clear()
-
     return redirect(url_for('login'))
-# ---------------------------------------------------------------------------
-# ALUNO
-# ---------------------------------------------------------------------------
+
 
 @app.route('/cadastrar/aluno', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_aluno():
     return render_template(
         'cadastrar/aluno.jinja2',
         api='/api/cadastrar/aluno',
     )
 
-
 @app.route('/atualizar/aluno', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_aluno():
     registros = executar_select(
         db=NOME_BANCO,
@@ -146,8 +162,8 @@ def tela_atualizar_aluno():
         data_matricula=data_matricula,
     )
 
-
 @app.route('/consultar/aluno', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_aluno():
     registros = executar_select(
         db=NOME_BANCO,
@@ -168,19 +184,16 @@ def tela_consultar_aluno():
     )
 
 
-# ---------------------------------------------------------------------------
-# ESPECIALIDADE_PROFESSOR
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/especialidade_professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_especialidade_professor():
     return render_template(
         'cadastrar/especialidade_professor.jinja2',
         api='/api/cadastrar/especialidade_professor',
     )
 
-
 @app.route('/atualizar/especialidade_professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_especialidade_professor():
     registros = executar_select(
         db=NOME_BANCO,
@@ -201,8 +214,8 @@ def tela_atualizar_especialidade_professor():
         especialidade=especialidade,
     )
 
-
 @app.route('/consultar/especialidade_professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_especialidade_professor():
     registros = executar_select(
         db=NOME_BANCO,
@@ -220,18 +233,8 @@ def tela_consultar_especialidade_professor():
     )
 
 
-# ---------------------------------------------------------------------------
-# PROFESSOR
-# ---------------------------------------------------------------------------
-
-def buscar_especialidades():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_especialidade, especialidade FROM especialidade_professor"
-    )
-
-
 @app.route('/cadastrar/professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_professor():
     return render_template(
         'cadastrar/professor.jinja2',
@@ -239,8 +242,8 @@ def tela_cadastrar_professor():
         especialidades=buscar_especialidades(),
     )
 
-
 @app.route('/atualizar/professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_professor():
     registros = executar_select(
         db=NOME_BANCO,
@@ -263,8 +266,8 @@ def tela_atualizar_professor():
         id_especialidade=id_especialidade,
     )
 
-
 @app.route('/consultar/professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_professor():
     registros = executar_select(
         db=NOME_BANCO,
@@ -286,19 +289,16 @@ def tela_consultar_professor():
     )
 
 
-# ---------------------------------------------------------------------------
-# DISCIPLINA
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_disciplina():
     return render_template(
         'cadastrar/disciplina.jinja2',
         api='/api/cadastrar/disciplina',
     )
 
-
 @app.route('/atualizar/disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
@@ -321,8 +321,8 @@ def tela_atualizar_disciplina():
         tipo=tipo,
     )
 
-
 @app.route('/consultar/disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
@@ -340,25 +340,8 @@ def tela_consultar_disciplina():
     )
 
 
-# ---------------------------------------------------------------------------
-# DISCIPLINA_PROFESSOR (chave composta: id_professor + id_disciplina)
-# ---------------------------------------------------------------------------
-
-def buscar_professores():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_professor, nome FROM professor"
-    )
-
-
-def buscar_disciplinas():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_disciplina, nome FROM disciplina"
-    )
-
-
 @app.route('/cadastrar/disciplina_professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_disciplina_professor():
     return render_template(
         'cadastrar/disciplina_professor.jinja2',
@@ -367,8 +350,8 @@ def tela_cadastrar_disciplina_professor():
         disciplinas=buscar_disciplinas(),
     )
 
-
 @app.route('/consultar/disciplina_professor', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_disciplina_professor():
     registros = executar_select(
         db=NOME_BANCO,
@@ -390,26 +373,16 @@ def tela_consultar_disciplina_professor():
     )
 
 
-# ---------------------------------------------------------------------------
-# PERIODO_LETIVO
-# ---------------------------------------------------------------------------
-
-def buscar_periodos():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_periodo, descricao FROM periodo_letivo"
-    )
-
-
 @app.route('/cadastrar/periodo_letivo', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_periodo_letivo():
     return render_template(
         'cadastrar/periodo_letivo.jinja2',
         api='/api/cadastrar/periodo_letivo',
     )
 
-
 @app.route('/atualizar/periodo_letivo', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_periodo_letivo():
     registros = executar_select(
         db=NOME_BANCO,
@@ -432,8 +405,8 @@ def tela_atualizar_periodo_letivo():
         data_fim=data_fim,
     )
 
-
 @app.route('/consultar/periodo_letivo', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_periodo_letivo():
     registros = executar_select(
         db=NOME_BANCO,
@@ -451,11 +424,8 @@ def tela_consultar_periodo_letivo():
     )
 
 
-# ---------------------------------------------------------------------------
-# PERIODO_FERIAS
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/periodo_ferias', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_periodo_ferias():
     return render_template(
         'cadastrar/periodo_ferias.jinja2',
@@ -463,8 +433,8 @@ def tela_cadastrar_periodo_ferias():
         periodos=buscar_periodos(),
     )
 
-
 @app.route('/atualizar/periodo_ferias', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_periodo_ferias():
     registros = executar_select(
         db=NOME_BANCO,
@@ -488,8 +458,8 @@ def tela_atualizar_periodo_ferias():
         data_fim=data_fim,
     )
 
-
 @app.route('/consultar/periodo_ferias', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_periodo_ferias():
     registros = executar_select(
         db=NOME_BANCO,
@@ -511,18 +481,8 @@ def tela_consultar_periodo_ferias():
     )
 
 
-# ---------------------------------------------------------------------------
-# TURMA
-# ---------------------------------------------------------------------------
-
-def buscar_turmas():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_turma, nome FROM turma"
-    )
-
-
 @app.route('/cadastrar/turma', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_turma():
     return render_template(
         'cadastrar/turma.jinja2',
@@ -530,8 +490,8 @@ def tela_cadastrar_turma():
         periodos=buscar_periodos(),
     )
 
-
 @app.route('/atualizar/turma', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_atualizar_turma():
     registros = executar_select(
         db=NOME_BANCO,
@@ -554,8 +514,8 @@ def tela_atualizar_turma():
         id_periodo=id_periodo,
     )
 
-
 @app.route('/consultar/turma', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_turma():
     registros = executar_select(
         db=NOME_BANCO,
@@ -577,11 +537,8 @@ def tela_consultar_turma():
     )
 
 
-# ---------------------------------------------------------------------------
-# TURMA_DISCIPLINA (chave composta: id_turma + id_disciplina + id_professor)
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/turma_disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_turma_disciplina():
     return render_template(
         'cadastrar/turma_disciplina.jinja2',
@@ -591,8 +548,8 @@ def tela_cadastrar_turma_disciplina():
         professores=buscar_professores(),
     )
 
-
 @app.route('/consultar/turma_disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_turma_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
@@ -620,18 +577,8 @@ def tela_consultar_turma_disciplina():
     )
 
 
-# ---------------------------------------------------------------------------
-# MATRICULA_DISCIPLINA (chave composta: id_aluno + id_disciplina + id_turma)
-# ---------------------------------------------------------------------------
-
-def buscar_alunos():
-    return executar_select(
-        db=NOME_BANCO,
-        consulta_sql="SELECT id_aluno, nome FROM aluno"
-    )
-
-
 @app.route('/cadastrar/matricula_disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_cadastrar_matricula_disciplina():
     return render_template(
         'cadastrar/matricula_disciplina.jinja2',
@@ -641,8 +588,8 @@ def tela_cadastrar_matricula_disciplina():
         turmas=buscar_turmas(),
     )
 
-
 @app.route('/consultar/matricula_disciplina', methods=['GET'])
+@perfil_requerido('DEV')
 def tela_consultar_matricula_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
@@ -670,11 +617,8 @@ def tela_consultar_matricula_disciplina():
     )
 
 
-# ---------------------------------------------------------------------------
-# AVALIACAO
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/avaliacao', methods=['GET'])
+@login_required
 def tela_cadastrar_avaliacao():
     return render_template(
         'cadastrar/avaliacao.jinja2',
@@ -683,8 +627,8 @@ def tela_cadastrar_avaliacao():
         disciplinas=buscar_disciplinas(),
     )
 
-
 @app.route('/atualizar/avaliacao', methods=['GET'])
+@login_required
 def tela_atualizar_avaliacao():
     registros = executar_select(
         db=NOME_BANCO,
@@ -712,8 +656,8 @@ def tela_atualizar_avaliacao():
         id_disciplina=id_disciplina,
     )
 
-
 @app.route('/consultar/avaliacao', methods=['GET'])
+@login_required
 def tela_consultar_avaliacao():
     registros = executar_select(
         db=NOME_BANCO,
@@ -735,11 +679,8 @@ def tela_consultar_avaliacao():
     )
 
 
-# ---------------------------------------------------------------------------
-# REGISTRO_FREQUENCIA
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/registro_frequencia', methods=['GET'])
+@login_required
 def tela_cadastrar_registro_frequencia():
     return render_template(
         'cadastrar/registro_frequencia.jinja2',
@@ -749,8 +690,8 @@ def tela_cadastrar_registro_frequencia():
         status_opcoes=STATUS_PRESENCA_OPCOES,
     )
 
-
 @app.route('/atualizar/registro_frequencia', methods=['GET'])
+@login_required
 def tela_atualizar_registro_frequencia():
     registros = executar_select(
         db=NOME_BANCO,
@@ -777,8 +718,8 @@ def tela_atualizar_registro_frequencia():
         status_presenca=status_presenca,
     )
 
-
 @app.route('/consultar/registro_frequencia', methods=['GET'])
+@login_required
 def tela_consultar_registro_frequencia():
     registros = executar_select(
         db=NOME_BANCO,
@@ -800,11 +741,8 @@ def tela_consultar_registro_frequencia():
     )
 
 
-# ---------------------------------------------------------------------------
-# RESULTADO_FINAL (chave composta: id_aluno + id_disciplina)
-# ---------------------------------------------------------------------------
-
 @app.route('/cadastrar/resultado_final', methods=['GET'])
+@login_required
 def tela_cadastrar_resultado_final():
     return render_template(
         'cadastrar/resultado_final.jinja2',
@@ -815,8 +753,8 @@ def tela_cadastrar_resultado_final():
         frequencia_opcoes=FREQUENCIA_OPCOES,
     )
 
-
 @app.route('/atualizar/resultado_final', methods=['GET'])
+@login_required
 def tela_atualizar_resultado_final():
     registros = executar_select(
         db=NOME_BANCO,
@@ -844,8 +782,8 @@ def tela_atualizar_resultado_final():
         frequencia=frequencia,
     )
 
-
 @app.route('/consultar/resultado_final', methods=['GET'])
+@login_required
 def tela_consultar_resultado_final():
     registros = executar_select(
         db=NOME_BANCO,
@@ -867,15 +805,8 @@ def tela_consultar_resultado_final():
     )
 
 
-################
-#     API      #
-################
-
-# ---------------------------------------------------------------------------
-# ALUNO
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/aluno', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_aluno():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -894,8 +825,8 @@ def api_cadastrar_aluno():
         return "ERRO: Insercao de aluno mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} aluno(s) inserido(s). Volte para /consultar/aluno para ver o resultado."
 
-
 @app.route('/api/atualizar/aluno', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_aluno():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -916,8 +847,8 @@ def api_atualizar_aluno():
         return "ERRO: Atualizacao de aluno mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} aluno(s) atualizado(s). Volte para /consultar/aluno para ver o resultado."
 
-
 @app.route('/api/apagar/aluno', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_aluno():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -929,11 +860,8 @@ def api_apagar_aluno():
     return f"SUCESSO: {qtd} aluno(s) apagado(s). Volte para /consultar/aluno para ver o resultado."
 
 
-# ---------------------------------------------------------------------------
-# ESPECIALIDADE_PROFESSOR
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/especialidade_professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_especialidade_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -944,8 +872,8 @@ def api_cadastrar_especialidade_professor():
         return "ERRO: Insercao de especialidade mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} especialidade(s) inserida(s). Volte para /consultar/especialidade_professor."
 
-
 @app.route('/api/atualizar/especialidade_professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_especialidade_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -959,8 +887,8 @@ def api_atualizar_especialidade_professor():
         return "ERRO: Atualizacao de especialidade mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} especialidade(s) atualizada(s). Volte para /consultar/especialidade_professor."
 
-
 @app.route('/api/apagar/especialidade_professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_especialidade_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -972,11 +900,8 @@ def api_apagar_especialidade_professor():
     return f"SUCESSO: {qtd} especialidade(s) apagada(s). Volte para /consultar/especialidade_professor."
 
 
-# ---------------------------------------------------------------------------
-# PROFESSOR
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -990,8 +915,8 @@ def api_cadastrar_professor():
         return "ERRO: Insercao de professor mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} professor(es) inserido(s). Volte para /consultar/professor."
 
-
 @app.route('/api/atualizar/professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1006,8 +931,8 @@ def api_atualizar_professor():
         return "ERRO: Atualizacao de professor mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} professor(es) atualizado(s). Volte para /consultar/professor."
 
-
 @app.route('/api/apagar/professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1019,11 +944,8 @@ def api_apagar_professor():
     return f"SUCESSO: {qtd} professor(es) apagado(s). Volte para /consultar/professor."
 
 
-# ---------------------------------------------------------------------------
-# DISCIPLINA
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1038,8 +960,8 @@ def api_cadastrar_disciplina():
         return "ERRO: Insercao de disciplina mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} disciplina(s) inserida(s). Volte para /consultar/disciplina."
 
-
 @app.route('/api/atualizar/disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1055,8 +977,8 @@ def api_atualizar_disciplina():
         return "ERRO: Atualizacao de disciplina mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} disciplina(s) atualizada(s). Volte para /consultar/disciplina."
 
-
 @app.route('/api/apagar/disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1068,11 +990,8 @@ def api_apagar_disciplina():
     return f"SUCESSO: {qtd} disciplina(s) apagada(s). Volte para /consultar/disciplina."
 
 
-# ---------------------------------------------------------------------------
-# DISCIPLINA_PROFESSOR
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/disciplina_professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_disciplina_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1086,8 +1005,8 @@ def api_cadastrar_disciplina_professor():
         return "ERRO: Insercao mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} vinculo(s) inserido(s). Volte para /consultar/disciplina_professor."
 
-
 @app.route('/api/apagar/disciplina_professor', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_disciplina_professor():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1102,11 +1021,8 @@ def api_apagar_disciplina_professor():
     return f"SUCESSO: {qtd} vinculo(s) apagado(s). Volte para /consultar/disciplina_professor."
 
 
-# ---------------------------------------------------------------------------
-# PERIODO_LETIVO
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/periodo_letivo', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_periodo_letivo():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1121,8 +1037,8 @@ def api_cadastrar_periodo_letivo():
         return "ERRO: Insercao de periodo letivo mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} periodo(s) inserido(s). Volte para /consultar/periodo_letivo."
 
-
 @app.route('/api/atualizar/periodo_letivo', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_periodo_letivo():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1138,8 +1054,8 @@ def api_atualizar_periodo_letivo():
         return "ERRO: Atualizacao de periodo letivo mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} periodo(s) atualizado(s). Volte para /consultar/periodo_letivo."
 
-
 @app.route('/api/apagar/periodo_letivo', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_periodo_letivo():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1151,11 +1067,8 @@ def api_apagar_periodo_letivo():
     return f"SUCESSO: {qtd} periodo(s) apagado(s). Volte para /consultar/periodo_letivo."
 
 
-# ---------------------------------------------------------------------------
-# PERIODO_FERIAS
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/periodo_ferias', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_periodo_ferias():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1170,8 +1083,8 @@ def api_cadastrar_periodo_ferias():
         return "ERRO: Insercao de periodo de ferias mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} periodo(s) de ferias inserido(s). Volte para /consultar/periodo_ferias."
 
-
 @app.route('/api/atualizar/periodo_ferias', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_periodo_ferias():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1187,8 +1100,8 @@ def api_atualizar_periodo_ferias():
         return "ERRO: Atualizacao de periodo de ferias mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} periodo(s) de ferias atualizado(s). Volte para /consultar/periodo_ferias."
 
-
 @app.route('/api/apagar/periodo_ferias', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_periodo_ferias():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1200,11 +1113,8 @@ def api_apagar_periodo_ferias():
     return f"SUCESSO: {qtd} periodo(s) de ferias apagado(s). Volte para /consultar/periodo_ferias."
 
 
-# ---------------------------------------------------------------------------
-# TURMA
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/turma', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_turma():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1218,8 +1128,8 @@ def api_cadastrar_turma():
         return "ERRO: Insercao de turma mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} turma(s) inserida(s). Volte para /consultar/turma."
 
-
 @app.route('/api/atualizar/turma', methods=['POST'])
+@perfil_requerido('DEV')
 def api_atualizar_turma():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1234,8 +1144,8 @@ def api_atualizar_turma():
         return "ERRO: Atualizacao de turma mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} turma(s) atualizada(s). Volte para /consultar/turma."
 
-
 @app.route('/api/apagar/turma', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_turma():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1247,11 +1157,8 @@ def api_apagar_turma():
     return f"SUCESSO: {qtd} turma(s) apagada(s). Volte para /consultar/turma."
 
 
-# ---------------------------------------------------------------------------
-# TURMA_DISCIPLINA
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/turma_disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_turma_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1269,8 +1176,8 @@ def api_cadastrar_turma_disciplina():
         return "ERRO: Insercao mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} vinculo(s) inserido(s). Volte para /consultar/turma_disciplina."
 
-
 @app.route('/api/apagar/turma_disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_turma_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1289,11 +1196,8 @@ def api_apagar_turma_disciplina():
     return f"SUCESSO: {qtd} vinculo(s) apagado(s). Volte para /consultar/turma_disciplina."
 
 
-# ---------------------------------------------------------------------------
-# MATRICULA_DISCIPLINA
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/matricula_disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_cadastrar_matricula_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1311,8 +1215,8 @@ def api_cadastrar_matricula_disciplina():
         return "ERRO: Insercao mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} matricula(s) inserida(s). Volte para /consultar/matricula_disciplina."
 
-
 @app.route('/api/apagar/matricula_disciplina', methods=['POST'])
+@perfil_requerido('DEV')
 def api_apagar_matricula_disciplina():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1331,11 +1235,8 @@ def api_apagar_matricula_disciplina():
     return f"SUCESSO: {qtd} matricula(s) apagada(s). Volte para /consultar/matricula_disciplina."
 
 
-# ---------------------------------------------------------------------------
-# AVALIACAO
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/avaliacao', methods=['POST'])
+@login_required
 def api_cadastrar_avaliacao():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1356,8 +1257,8 @@ def api_cadastrar_avaliacao():
         return "ERRO: Insercao de avaliacao mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} avaliacao(oes) inserida(s). Volte para /consultar/avaliacao."
 
-
 @app.route('/api/atualizar/avaliacao', methods=['POST'])
+@login_required
 def api_atualizar_avaliacao():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1381,8 +1282,8 @@ def api_atualizar_avaliacao():
         return "ERRO: Atualizacao de avaliacao mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} avaliacao(oes) atualizada(s). Volte para /consultar/avaliacao."
 
-
 @app.route('/api/apagar/avaliacao', methods=['POST'])
+@login_required
 def api_apagar_avaliacao():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1394,11 +1295,8 @@ def api_apagar_avaliacao():
     return f"SUCESSO: {qtd} avaliacao(oes) apagada(s). Volte para /consultar/avaliacao."
 
 
-# ---------------------------------------------------------------------------
-# REGISTRO_FREQUENCIA
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/registro_frequencia', methods=['POST'])
+@login_required
 def api_cadastrar_registro_frequencia():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1417,8 +1315,8 @@ def api_cadastrar_registro_frequencia():
         return "ERRO: Insercao de frequencia mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} registro(s) inserido(s). Volte para /consultar/registro_frequencia."
 
-
 @app.route('/api/atualizar/registro_frequencia', methods=['POST'])
+@login_required
 def api_atualizar_registro_frequencia():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1439,8 +1337,8 @@ def api_atualizar_registro_frequencia():
         return "ERRO: Atualizacao de frequencia mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} registro(s) atualizado(s). Volte para /consultar/registro_frequencia."
 
-
 @app.route('/api/apagar/registro_frequencia', methods=['POST'])
+@login_required
 def api_apagar_registro_frequencia():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1452,11 +1350,8 @@ def api_apagar_registro_frequencia():
     return f"SUCESSO: {qtd} registro(s) apagado(s). Volte para /consultar/registro_frequencia."
 
 
-# ---------------------------------------------------------------------------
-# RESULTADO_FINAL
-# ---------------------------------------------------------------------------
-
 @app.route('/api/cadastrar/resultado_final', methods=['POST'])
+@login_required
 def api_cadastrar_resultado_final():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1475,8 +1370,8 @@ def api_cadastrar_resultado_final():
         return "ERRO: Insercao de resultado final mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} resultado(s) inserido(s). Volte para /consultar/resultado_final."
 
-
 @app.route('/api/atualizar/resultado_final', methods=['POST'])
+@login_required
 def api_atualizar_resultado_final():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1496,8 +1391,8 @@ def api_atualizar_resultado_final():
         return "ERRO: Atualizacao de resultado final mal feita. Veja os logs do Python para detalhes."
     return f"SUCESSO: {qtd} resultado(s) atualizado(s). Volte para /consultar/resultado_final."
 
-
 @app.route('/api/apagar/resultado_final', methods=['POST'])
+@login_required
 def api_apagar_resultado_final():
     qtd = executar_insert_delete_update(
         db=NOME_BANCO,
@@ -1512,7 +1407,6 @@ def api_apagar_resultado_final():
     return f"SUCESSO: {qtd} resultado(s) apagado(s). Volte para /consultar/resultado_final."
 
 
-# Inicia o servidor Flask (NAO ALTERE OU REMOVA O CODIGO ABAIXO)
 if __name__ == '__main__':
     while True:
         try:
