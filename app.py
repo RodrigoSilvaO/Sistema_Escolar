@@ -554,14 +554,14 @@ def tela_consultar_turma_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
         consulta_sql="""
-            SELECT t.id_turma, t.nome, d.nome, p.nome
+            SELECT t.id_turma, t.nome, td.id_disciplina, d.nome, td.id_professor, p.nome
             FROM turma_disciplina td, turma t, disciplina d, professor p
             WHERE td.id_turma = t.id_turma
               AND td.id_disciplina = d.id_disciplina
               AND td.id_professor = p.id_professor
         """
     )
-    cabecalho = ["ID Turma", "Turma", "Disciplina", "Professor"]
+    cabecalho = ["ID Turma", "Turma", "ID Disciplina", "Disciplina", "ID Professor", "Professor"]
     return render_template(
         'consultar.jinja2',
         titulo='Turmas x Disciplinas',
@@ -594,14 +594,14 @@ def tela_consultar_matricula_disciplina():
     registros = executar_select(
         db=NOME_BANCO,
         consulta_sql="""
-            SELECT a.id_aluno, a.nome, d.nome, t.nome
+            SELECT a.id_aluno, a.nome, m.id_disciplina, d.nome, m.id_turma, t.nome
             FROM matricula_disciplina m, aluno a, disciplina d, turma t
             WHERE m.id_aluno = a.id_aluno
               AND m.id_disciplina = d.id_disciplina
               AND m.id_turma = t.id_turma
         """
     )
-    cabecalho = ["ID Aluno", "Aluno", "Disciplina", "Turma"]
+    cabecalho = ["ID Aluno", "Aluno", "ID Disciplina", "Disciplina", "ID Turma", "Turma"]
     return render_template(
         'consultar.jinja2',
         titulo='Matriculas em Disciplinas',
@@ -788,12 +788,12 @@ def tela_consultar_resultado_final():
     registros = executar_select(
         db=NOME_BANCO,
         consulta_sql="""
-            SELECT r.id_aluno, a.nome, d.nome, r.situacao, r.frequencia
+            SELECT r.id_aluno, a.nome, r.id_disciplina, d.nome, r.situacao, r.frequencia
             FROM resultado_final r, aluno a, disciplina d
             WHERE r.id_aluno = a.id_aluno AND r.id_disciplina = d.id_disciplina
         """
     )
-    cabecalho = ["ID Aluno", "Aluno", "Disciplina", "Situacao", "Frequencia"]
+    cabecalho = ["ID Aluno", "Aluno", "ID Disciplina", "Disciplina", "Situacao", "Frequencia"]
     return render_template(
         'consultar.jinja2',
         titulo='Resultados Finais',
