@@ -27,14 +27,14 @@ USUARIOS = {
         "senha": "Aryan",
         "nome": "Aryan Assis",
         "perfil": "DEV",
-        "foto": "Aryan.png"
+        "foto": "Aryan.jpg"
     },
 
     "Helena": {
         "senha": "Helena",
         "nome": "Helena Freitas",
         "perfil": "DEV",
-        "foto": "Helena.png"
+        "foto": "Helena.jpeg"
     },
 
     "Saulo": {
