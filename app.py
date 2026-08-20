@@ -11,35 +11,35 @@ app.secret_key = "sistema_escolar"
 USUARIOS = {
     "Rodrigo": {
         "senha": "Rodrigo",
-        "nome": "Rodrigo",
+        "nome": "Rodrigo da Silva",
         "perfil": "DEV",
         "foto": "Rodrigo.png"
     },
 
     "Andre": {
         "senha": "Andre",
-        "nome": "Andre",
+        "nome": "Andre Madureira",
         "perfil": "Professor",
         "foto": "Andre.png"
     },
 
     "Aryan": {
         "senha": "Aryan",
-        "nome": "Aryan",
+        "nome": "Aryan Assis",
         "perfil": "DEV",
         "foto": "Aryan.png"
     },
 
     "Helena": {
         "senha": "Helena",
-        "nome": "Helena",
+        "nome": "Helena Freitas",
         "perfil": "DEV",
         "foto": "Helena.png"
     },
 
     "Saulo": {
         "senha": "Saulo",
-        "nome": "Saulo",
+        "nome": "Saulo Henrique",
         "perfil": "DEV",
         "foto": "Saulo.png"
     }
